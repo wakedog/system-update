@@ -1,0 +1,231 @@
+.TH SYSTEM-UPDATE 1 "September 2026" "system-update 1.0.0" "User Commands"
+.SH NAME
+system-update \- keep Ubuntu, snaps, Flatpak apps and firmware up to date
+.SH SYNOPSIS
+.B system-update
+.br
+.B system-update check
+.RB [ \-\-refresh ]
+.RB [ \-\-no\-firmware ]
+.RB [ \-\-json ]
+.br
+.B system-update upgrade
+.RB [ \-y ]
+.RB [ \-n ]
+.RB [ \-v ]
+.RI [ options ]
+.br
+.B system-update history
+.RB [ \-\-json ]
+.br
+.B system-update
+.RB [ \-\-yes ]
+.RB [ \-\-dry\-run ]
+.RB [ \-\-no\-firmware ]
+.RB [ \-\-verbose ]
+.SH DESCRIPTION
+.B system-update
+installs updates for system packages (APT), snaps, Flatpak apps and device
+firmware (fwupd), then tidies up: it removes unused packages, the package
+cache, old snap revisions and unused Flatpak runtimes, and trims the system
+journal.
+.PP
+Run without arguments to open the desktop app.
+Run as root without arguments, it updates the system like
+.BR "system-update upgrade" .
+The last form above is the command line of the older
+.B system-update.sh
+script, which keeps working, so
+.B system-update
+can replace it in timers and cron jobs.
+.PP
+Checking never changes anything and needs no password.
+Updating is done by a helper that runs as root through
+.BR pkexec (1),
+so you are asked for an administrator password once per run, unless you
+are already root.
+Nothing ever stops to ask a question, and apt and dpkg are never
+interrupted, not even by a timeout.
+.SH COMMANDS
+.TP
+.B check
+List the available updates for every source.
+Nothing is changed.
+With
+.BR \-\-refresh ,
+package information is refreshed first, which the desktop app also does when
+it opens; on an installed system that needs no password.
+.TP
+.B upgrade
+Refresh package information, install all updates and clean up.
+In order, it runs:
+.RS
+.IP \(bu 2
+.BR "APT" :
+wait for other package managers, refresh package lists, finish interrupted
+installations
+.RB ( "dpkg \-\-configure \-a" ", " "apt-get \-f install" ),
+then
+.BR "apt-get full-upgrade" ,
+keeping existing configuration files.
+.IP \(bu 2
+.BR "Snaps" :
+refresh every snap through snapd.
+.IP \(bu 2
+.BR "Flatpak" :
+update the system installation, and yours when you are not root.
+.IP \(bu 2
+.BR "Firmware" :
+refresh fwupd metadata and list available firmware updates.
+They are only installed with
+.BR \-\-yes .
+.IP \(bu 2
+.BR "Clean-up" :
+.BR "apt-get autoremove \-\-purge" ,
+.BR "apt-get clean" ,
+removal of disabled snap revisions,
+.BR "flatpak uninstall \-\-unused" ,
+and
+.B journalctl \-\-rotate \-\-vacuum\-time \-\-vacuum\-size
+(7 days and 200 MB by default).
+.RE
+.TP
+.B history
+List past update runs, including the ones started by timers or as root.
+.SH OPTIONS
+.TP
+.BR \-y ", " \-\-yes
+Fully unattended: also install firmware updates, and let
+.BR needrestart (1)
+restart services that use outdated libraries instead of only listing them.
+.TP
+.BR \-n ", " \-\-dry\-run
+Show what would be updated and which steps would run, and stop.
+Needs no password.
+.TP
+.BR \-v ", " \-\-verbose
+Print the output of every command as it runs.
+.TP
+.B \-\-no\-firmware
+Skip firmware checks and updates entirely.
+.TP
+.B \-\-no\-snap
+Do not update snaps or remove old snap revisions.
+.TP
+.B \-\-no\-flatpak
+Do not update Flatpak apps or remove unused runtimes.
+.TP
+.B \-\-no\-cleanup
+Skip every clean-up step.
+.TP
+.BI \-\-journal\-days " DAYS"
+Keep this many days of system journal (1\(en365).
+.TP
+.BI \-\-journal\-max\-mb " MB"
+Trim the system journal to at most this many megabytes (16\(en100000).
+.TP
+.B \-\-refresh
+Refresh package information before checking
+.RB ( check
+only).
+.TP
+.B \-\-json
+Print machine-readable JSON.
+.TP
+.B \-\-no\-color
+Never use colors. Colors are also off when output is not a terminal or
+.B NO_COLOR
+is set.
+.TP
+.BR \-V ", " \-\-version
+Print the version and exit.
+.PP
+Without options, the journal limits saved in the desktop app's preferences
+are used.
+.SH SAFETY
+Only one update runs at a time; it shares the lock
+.I /run/lock/system-update.lock
+with
+.BR system-update.sh ,
+so the two never run together.
+Before touching packages it waits up to 5 minutes for other package managers,
+such as unattended-upgrades, to finish.
+The privileged helper accepts only a fixed list of task names and numeric
+limits, and never runs commands or paths supplied by the caller.
+Pressing Ctrl+C, or Stop in the app, finishes the current step and skips
+the rest.
+.SH FILES
+.TP
+.I /var/log/system-update/update-YYYYMMDD-HHMMSS.log
+A detailed log of each run, in the same format as
+.BR system-update.sh .
+The 10 most recent logs are kept.
+They can be read by root and members of the
+.B adm
+group.
+.TP
+.I /var/lib/system-update/history.jsonl
+The record of past runs shown by
+.B history
+and in the app.
+.TP
+.I ~/.config/system-update/settings.json
+Preferences and the selection made in the app.
+.TP
+.I /usr/libexec/system-update/system-update-helper
+The privileged helper.
+.TP
+.I /usr/share/polkit-1/actions/io.github.wakedog.SystemUpdate.policy
+Polkit policy: checking for updates needs no password in an active local
+session; installing asks for an administrator password.
+.SH EXIT STATUS
+.TP
+.B 0
+Success.
+For
+.BR check :
+everything is up to date.
+.TP
+.B 1
+Some steps failed (see the log), or
+.B check
+could not check a source.
+.TP
+.B 2
+Invalid arguments.
+.TP
+.B 3
+The update could not start: another update is running, there is no network
+connection, or authentication failed.
+.TP
+.B 100
+.B check
+found updates.
+.TP
+.B 130
+Interrupted.
+.SH EXAMPLES
+See what is available:
+.PP
+.RS
+.B system-update check
+.RE
+.PP
+Update everything from a nightly timer, including firmware:
+.PP
+.RS
+.B system-update \-\-yes
+.RE
+.PP
+Warn from a monitoring script when security updates are waiting:
+.PP
+.RS
+.B system-update check \-\-json | jq .security
+.RE
+.SH SEE ALSO
+.BR apt-get (8),
+.BR snap (8),
+.BR flatpak (1),
+.BR fwupdmgr (1),
+.BR journalctl (1),
+.BR pkexec (1)

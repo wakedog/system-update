@@ -1,0 +1,13 @@
+[Desktop Entry]
+Type=Application
+Name=System Update
+GenericName=Updater
+Comment=Install updates for system packages, snaps, Flatpak apps and firmware
+Keywords=update;upgrade;updates;updater;apt;snap;flatpak;firmware;fwupd;security;patch;
+Exec=system-update
+Icon=io.github.wakedog.SystemUpdate
+Terminal=false
+Categories=GTK;GNOME;System;
+StartupNotify=true
+SingleMainWindow=true
+X-GNOME-UsesNotifications=true

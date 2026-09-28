@@ -1,0 +1,35 @@
+# bash completion for system-update                         -*- shell-script -*-
+
+_system_update()
+{
+    local cur prev words cword
+    _init_completion || return
+
+    local commands="check upgrade history"
+
+    if ((cword == 1)); then
+        COMPREPLY=($(compgen -W "$commands --help --version --yes --dry-run --no-firmware --verbose" -- "$cur"))
+        return
+    fi
+
+    case $prev in
+        --journal-days | --journal-max-mb)
+            return
+            ;;
+    esac
+
+    local options="--help --json --no-color"
+    case ${words[1]} in
+        check)
+            options+=" --refresh --no-firmware"
+            ;;
+        upgrade | -*)
+            options+=" --yes --dry-run --verbose --no-firmware --no-snap --no-flatpak --no-cleanup"
+            options+=" --journal-days --journal-max-mb"
+            ;;
+    esac
+    COMPREPLY=($(compgen -W "$options" -- "$cur"))
+} &&
+    complete -F _system_update system-update
+
+# ex: filetype=sh

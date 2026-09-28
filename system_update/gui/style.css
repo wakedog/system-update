@@ -1,0 +1,116 @@
+.summary-card {
+  padding: 20px 22px;
+}
+
+.summary-title {
+  font-size: 1.6em;
+  font-weight: 800;
+}
+
+.task-icon {
+  min-width: 32px;
+  min-height: 32px;
+  border-radius: 9px;
+}
+
+/* Mixing in the text color darkens these in the light style and lightens
+   them in the dark one, on every libadwaita version. */
+.task-icon.updates {
+  color: mix(@blue_3, @window_fg_color, 0.3);
+  background-color: alpha(@blue_3, 0.16);
+}
+
+.task-icon.maintenance {
+  color: mix(@green_4, @window_fg_color, 0.35);
+  background-color: alpha(@green_4, 0.18);
+}
+
+.size-label {
+  font-weight: 600;
+}
+
+.tag {
+  font-size: 0.8em;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 99px;
+}
+
+.tag.security {
+  color: @warning_fg_color;
+  background-color: @warning_bg_color;
+}
+
+.tag.new {
+  color: @accent_fg_color;
+  background-color: @accent_bg_color;
+}
+
+.tag.remove {
+  color: @error_fg_color;
+  background-color: @error_bg_color;
+}
+
+row.pending {
+  opacity: 0.5;
+}
+
+.row-state.done {
+  color: @success_color;
+}
+
+.row-state.warning {
+  color: @warning_color;
+}
+
+.row-state.failed {
+  color: @error_color;
+}
+
+.row-state.skipped {
+  opacity: 0.6;
+}
+
+.row-state.accent {
+  color: @accent_color;
+}
+
+.status-badge {
+  padding: 24px;
+  border-radius: 999px;
+}
+
+.status-badge.small {
+  padding: 14px;
+}
+
+.status-badge.success {
+  color: @success_color;
+  background-color: alpha(@success_color, 0.14);
+}
+
+.status-badge.warning {
+  color: @warning_color;
+  background-color: alpha(@warning_color, 0.14);
+}
+
+.status-badge.error {
+  color: @error_color;
+  background-color: alpha(@error_color, 0.14);
+}
+
+.status-badge.accent {
+  color: @accent_color;
+  background-color: alpha(@accent_color, 0.14);
+}
+
+.terminal-frame {
+  background-color: #1e1e1e;
+}
+
+textview.terminal,
+textview.terminal text {
+  background-color: #1e1e1e;
+  color: #e6e6e6;
+  font-size: 0.9em;
+}

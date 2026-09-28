@@ -1,0 +1,42 @@
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Install build tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            python3 python3-gi gir1.2-gtk-4.0 gir1.2-adw-1 \
+            desktop-file-utils appstream
+
+      - name: Tag must match the app version
+        run: |
+          version=$(/usr/bin/python3 -c 'import system_update; print(system_update.__version__)')
+          if [ "v$version" != "$GITHUB_REF_NAME" ]; then
+            echo "::error::Tag $GITHUB_REF_NAME does not match __version__ $version"
+            exit 1
+          fi
+
+      - name: Tests and metadata validation
+        run: make check PYTHON=/usr/bin/python3
+
+      - name: Build .deb
+        run: make deb PYTHON=/usr/bin/python3
+        env:
+          DEB_MAINTAINER: "Bryan <7035363+wakedog@users.noreply.github.com>"
+
+      - name: Publish release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "$GITHUB_REF_NAME" dist/*.deb --title "System Update ${GITHUB_REF_NAME#v}" --generate-notes

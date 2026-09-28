@@ -1,0 +1,46 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  check:
+    name: Tests and package (Ubuntu ${{ matrix.ubuntu }})
+    runs-on: ubuntu-${{ matrix.ubuntu }}
+    strategy:
+      fail-fast: false
+      matrix:
+        ubuntu: ["24.04"]
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Install build and validation tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            python3 python3-gi gir1.2-gtk-4.0 gir1.2-adw-1 \
+            desktop-file-utils appstream
+
+      - name: Tests and metadata validation
+        run: make check PYTHON=/usr/bin/python3
+
+      - name: GUI modules import
+        run: /usr/bin/python3 -c "import system_update.gui.window, system_update.gui.dialogs"
+
+      - name: Build .deb
+        run: make deb PYTHON=/usr/bin/python3
+        env:
+          DEB_MAINTAINER: "Bryan <7035363+wakedog@users.noreply.github.com>"
+
+      - name: Inspect package
+        run: |
+          dpkg-deb --info dist/*.deb
+          dpkg-deb --contents dist/*.deb
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: system-update-deb
+          path: dist/*.deb

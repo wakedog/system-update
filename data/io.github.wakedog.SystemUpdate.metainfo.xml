@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright 2026 wakedog -->
+<component type="desktop-application">
+  <id>io.github.wakedog.SystemUpdate</id>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>MIT</project_license>
+
+  <name>System Update</name>
+  <summary>Keep Ubuntu and your apps up to date</summary>
+  <developer id="io.github.wakedog">
+    <name>Bryan</name>
+  </developer>
+  <url type="homepage">https://github.com/wakedog/system-update</url>
+  <url type="bugtracker">https://github.com/wakedog/system-update/issues</url>
+  <url type="vcs-browser">https://github.com/wakedog/system-update</url>
+
+  <description>
+    <p>
+      System Update installs every kind of update an Ubuntu computer gets, in
+      one place, and tidies up afterwards. You see what is available before
+      anything changes, and choose what to include.
+    </p>
+    <p>It updates:</p>
+    <ul>
+      <li>System packages from APT, including security updates</li>
+      <li>Snaps and Flatpak apps</li>
+      <li>Device firmware through fwupd</li>
+    </ul>
+    <p>
+      Afterwards it can remove unused packages, the package cache, old snap
+      revisions and unused Flatpak runtimes, and trim the system journal.
+    </p>
+    <p>
+      Progress is shown for every step, with the full output one click away.
+      Nothing ever stops to ask a question, installing packages is never
+      interrupted, and every run is logged and kept in a history. A
+      command-line interface is included for scripts and timers.
+    </p>
+  </description>
+
+  <launchable type="desktop-id">io.github.wakedog.SystemUpdate.desktop</launchable>
+  <provides>
+    <binary>system-update</binary>
+  </provides>
+
+  <requires>
+    <display_length compare="ge">360</display_length>
+  </requires>
+  <supports>
+    <control>keyboard</control>
+    <control>pointing</control>
+    <control>touch</control>
+  </supports>
+
+  <content_rating type="oars-1.1"/>
+
+  <branding>
+    <color type="primary" scheme_preference="light">#a6f0cb</color>
+    <color type="primary" scheme_preference="dark">#0d5540</color>
+  </branding>
+
+  <keywords>
+    <keyword>update</keyword>
+    <keyword>upgrade</keyword>
+    <keyword>apt</keyword>
+    <keyword>snap</keyword>
+    <keyword>flatpak</keyword>
+    <keyword>firmware</keyword>
+  </keywords>
+
+  <releases>
+    <release version="1.0.0" date="2026-09-28">
+      <description>
+        <p>System Update is now a desktop app.</p>
+        <ul>
+          <li>See every available update before installing: system packages, snaps, Flatpak apps and firmware</li>
+          <li>Live progress for each step, with the full command output one click away</li>
+          <li>Stop after the current step at any time; package installation is never interrupted</li>
+          <li>A reminder when the computer needs a restart, and a history of every update run</li>
+          <li>A command line that accepts the options of system-update.sh, for timers and scripts</li>
+        </ul>
+      </description>
+    </release>
+  </releases>
+</component>
